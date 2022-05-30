@@ -29,7 +29,7 @@ return {
   while true do
    while true do
     self.id, message = rednet.receive(self.protocall, timeout)
-    if message == 'estb' then
+    if message == 'est' then
      print('got estb from '..self.id)
      rednet.send(self.id, 'ack', self.protocall)
      id, message = rednet.receive(self.protocall, timeout)
@@ -47,22 +47,24 @@ return {
     id, message = rednet.receive(self.protocall, 0.1)
     if self.id == id then
      print('got message '..message)
-     if message == 'cls' then
+     if message:sub(1, 3) == 'cls' then
       self.id = 0
-     elseif message == 'lua' then
-      id, message = rednet.receive(self.protocall, 0.1)
+     elseif message:sub(1, 3) == 'lua' then
+      message = message:sub(5, -1)
       local f = loadstring(message)
       local e = false
       local m = ''
       e, m = pcall(f)
       if not e then
        print('error '..m..' '..message)
+       rednet.send(self.id, 'err:'..m, self.protocall)
+      else
+       rednet.send(self.id, 'ack', self.protocall)
       end
-     elseif message == 'cmd' then
-      id, message = rednet.receive(self.protocall, 0.1)
-      shell.run(message)
-     elseif message == 'fch' then
-     elseif message == 'fhc' then
+     elseif message:sub(1, 3) == 'cmd' then
+      shell.run(message:sub(5, -1))
+     elseif message:sub(1, 3) == 'fch' then
+     elseif message:sub(1, 3) == 'fhc' then
      end
     end
    end
@@ -76,7 +78,7 @@ return {
   rednet.open(self.modumSide)
   self.id = id
   local id = 0
-  rednet.send(self.id, 'estb', self.protocall)
+  rednet.send(self.id, 'est', self.protocall)
   id, message = rednet.receive(self.protocall, timeout)
   if message == 'ack' and id == self.id then
    rednet.send(self.id, password, self.protocall)
@@ -96,13 +98,22 @@ return {
  end,
 
  lua = function (self, code)
-  rednet.send(self.id, 'lua', self.protocall)
-  rednet.send(self.id, code, self.protocall)
+  rednet.send(self.id, 'lua:'..code, self.protocall)
+  while true do
+   id, message = rednet.receive(self.protocall, timeout)
+   if id == self.id then
+    if message == 'ack' then
+     break
+    elseif message:sub(1, 3) == 'err' then
+     print("Error "..message:sub(5, -1))
+     break
+    end
+   end
+  end
  end,
 
  command = function (self, code)
-  rednet.send(self.id, 'cmd', self.protocall)
-  rednet.send(self.id, code, self.protocall)
+  rednet.send(self.id, 'cmd:'..code, self.protocall)
  end,
 
  filesend = function (self)

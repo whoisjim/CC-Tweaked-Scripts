@@ -1,8 +1,8 @@
 return {
  pos = {
-  x = 0,
-  y = 0,
-  z = 0,
+  x = 0, --fb
+  y = 0, --ud
+  z = 0, --lr
   dir = 1 -- 1n, 2e, 3s, 4w
  },
  dirMap = {
@@ -49,7 +49,7 @@ return {
      end
     end
     if turtle.down() == true then
-     self.pos.z = slf.pos.z - 1
+     self.pos.y = self.pos.y - 1
     end
     if digDown then
      while turtle.detectDown() do
@@ -70,7 +70,7 @@ return {
      end
     end
     if turtle.up() == true then
-     self.pos.z = self.pos.z + 1
+     self.pos.y = self.pos.y + 1
     end
     if digDown then
      while turtle.detectDown() do
@@ -95,11 +95,11 @@ return {
      if dir == 1 then
       self.pos.x = self.pos.x + 1
      elseif dir == 2 then
-      self.pos.y = self.pos.y + 1
+      self.pos.z = self.pos.z + 1
      elseif dir == 3 then
       self.pos.x = self.pos.x - 1
      else -- dir == 4
-      self.pos.y = self.pos.y - 1
+      self.pos.z = self.pos.z - 1
      end
     end
     if digDown then
@@ -117,11 +117,15 @@ return {
  end,
  moveTo = function (self, dest, order, dig, digUp, digDown)
   if order == nil then
-   order = {'x', 'y', 'z'}
+   order = {'x', 'z', 'y'}
   end
-  if dest == nil then
-   dest = {x = 0, y = 0, z = 0}
-  end
+  if dest == nil then dest = {} end
+  if dest[1] ~= nil then dest.x = dest[1] end
+  if dest[2] ~= nil then dest.y = dest[2] end
+  if dest[3] ~= nil then dest.z = dest[3] end
+  if dest.x ~= nil then dest.x = 0 end
+  if dest.y ~= nil then dest.y = 0 end
+  if dest.z ~= nil then dest.z = 0 end
   local length = 0
   local dir = 'x'
   for i, axis in ipairs(order) do
@@ -134,15 +138,15 @@ return {
     end
    elseif axis == 'y' then 
     if length > 0 then
-     dir = 'e'
-    else
-     dir = 'w'
-    end
-   elseif axis == 'z' then
-    if length > 0 then
      dir = 'u'
     else
      dir = 'd'
+    end
+   elseif axis == 'z' then
+    if length > 0 then
+     dir = 'e'
+    else
+     dir = 'w'
     end
    end
    if length ~= 0 then
@@ -155,4 +159,7 @@ return {
    self:moveTo(pos, order, dig, digUp, digDown)
   end
  end,
+ home = function(self)
+  self:moveTo()
+ end
 }
