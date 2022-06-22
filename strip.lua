@@ -1,4 +1,4 @@
-local fun = require("fun")
+mm = require('minemove')
 x = tonumber(arg[1]) - 1
 y = tonumber(arg[2])
 z = tonumber(arg[3])
@@ -29,17 +29,17 @@ for k = 1,z do
  turtle.down()
  for j = 1,y do
   for i = 1,x do
-   fun.forward(l3)
+   mm:move('x', 1, true, l3, l3)
   end
   if j == y then
    print('last')
   elseif (((y+1) * k) + j) % 2 == y % 2 then
    turtle.turnRight()
-   fun.forward(l3)
+   mm:move('x', 1, true, l3, l3)
    turtle.turnRight()
   else
    turtle.turnLeft()
-   fun.forward(l3)
+   mm:move('x', 1, true, l3, l3)
    turtle.turnLeft()
   end
  end

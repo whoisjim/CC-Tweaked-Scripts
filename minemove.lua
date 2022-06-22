@@ -6,8 +6,8 @@ return {
   dir = 1 -- 1n, 2e, 3s, 4w
  },
  dirMap = {
-  x = 0, n = 1, e = 2, s = 3, w = 4, d = 5, u = 6,
-  [0] = 0, [1] = 1, [2] = 2, [3] = 3, [4] = 4, [5] = 5, [6] = 6
+  x = 0, n = 1, e = 2, s = 3, w = 4, d = 5, u = 6, r = 7,
+  [0] = 0, [1] = 1, [2] = 2, [3] = 3, [4] = 4, [5] = 5, [6] = 6, [7] = 7
  },
  setOrigin = function(self, x, y, z, dir)
   dir = self.dirMap[dir]
@@ -23,7 +23,7 @@ return {
  end,
  turn = function(self, dir)
   dir = self.dirMap[dir]
-  if dir == 0 then
+  if dir == 0 or dir == 7 then
    return
   elseif math.abs(dir - self.pos.dir) == 2 then
    turtle.turnLeft()
@@ -91,15 +91,29 @@ return {
       turtle.dig()
      end
     end
-    if turtle.forward() == true then
-     if dir == 1 then
-      self.pos.x = self.pos.x + 1
-     elseif dir == 2 then
-      self.pos.z = self.pos.z + 1
-     elseif dir == 3 then
-      self.pos.x = self.pos.x - 1
-     else -- dir == 4
-      self.pos.z = self.pos.z - 1
+    if dir == 7 then
+     if turtle.back() == true then
+      if self.pos.dir == 1 then
+       self.pos.x = self.pos.x - 1
+      elseif self.pos.dir == 2 then
+       self.pos.z = self.pos.z - 1
+      elseif self.pos.dir == 3 then
+       self.pos.x = self.pos.x + 1
+      else -- self.pos.dir == 4
+       self.pos.z = self.pos.z + 1
+      end
+     end
+    else
+     if turtle.forward() == true then
+      if self.pos.dir == 1 then
+       self.pos.x = self.pos.x + 1
+      elseif self.pos.dir == 2 then
+       self.pos.z = self.pos.z + 1
+      elseif self.pos.dir == 3 then
+       self.pos.x = self.pos.x - 1
+      else -- self.pos.dir == 4
+       self.pos.z = self.pos.z - 1
+      end
      end
     end
     if digDown then
@@ -123,13 +137,14 @@ return {
   if dest[1] ~= nil then dest.x = dest[1] end
   if dest[2] ~= nil then dest.y = dest[2] end
   if dest[3] ~= nil then dest.z = dest[3] end
-  if dest.x ~= nil then dest.x = 0 end
-  if dest.y ~= nil then dest.y = 0 end
-  if dest.z ~= nil then dest.z = 0 end
   local length = 0
   local dir = 'x'
   for i, axis in ipairs(order) do
-   length = dest[axis] - self.pos[axis]
+   if dest[axis] == nil then
+    length = 0
+   else    
+    length = dest[axis] - self.pos[axis]
+   end
    if axis == 'x' then
     if length > 0 then
      dir = 'n'
@@ -160,6 +175,6 @@ return {
   end
  end,
  home = function(self)
-  self:moveTo()
+  self:moveTo({0,0,0})
  end
 }
