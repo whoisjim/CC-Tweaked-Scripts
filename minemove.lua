@@ -9,6 +9,9 @@ return {
   x = 0, n = 1, e = 2, s = 3, w = 4, d = 5, u = 6, r = 7,
   [0] = 0, [1] = 1, [2] = 2, [3] = 3, [4] = 4, [5] = 5, [6] = 6, [7] = 7
  },
+ callbacks = {},
+ callbackCount = 0,
+ abort = false,
  setOrigin = function(self, x, y, z, dir)
   dir = self.dirMap[dir]
   if x == nil then x = 0 end
@@ -41,8 +44,9 @@ return {
  end,
  move = function(self, dir, length, dig, digUp, digDown)
   dir = self.dirMap[dir]
-  if dir == 5 then -- down
-   for i = 1, length do
+  for i = 1, length do -- move loop
+   if self.abort then self.abort = false break end
+   if dir == 5 then -- down
     if dig then
      while turtle.detectDown() do
       turtle.digDown()
@@ -61,9 +65,7 @@ return {
       turtle.digUp()
      end
     end
-   end
-  elseif dir == 6 then -- up
-   for i = 1, length do
+   elseif dir == 6 then -- up
     if dig then
      while turtle.detectUp() do
       turtle.digUp()
@@ -82,10 +84,8 @@ return {
       turtle.digUp()
      end
     end
-   end
-  else -- side to side
-   self:turn(dir)
-   for i = 1, length do
+   else -- side to side
+    self:turn(dir)
     if dig then
      while turtle.detect() do
       turtle.dig()
@@ -127,7 +127,26 @@ return {
      end
     end
    end
+   self.callbackCount = self.callbackCount + 1
+   for callback in ipairs(self.callbacks) do
+    if self.callbackCount % callback.loop == callback.trigger then
+     callback.func(self)
+    end
+   end
+  end -- move loop
+ end,
+ addCallback = function (self, callbackFunction, loopSize, callIndex)
+  if callIndex == nil then
+   callIndex = 0
   end
+  table.insert(
+   self.callbacks,
+   {
+    func = callbackFunction,
+    loop = loopSize,
+    index = callIndex,
+   }
+  )
  end,
  moveTo = function (self, dest, order, dig, digUp, digDown)
   if order == nil then
