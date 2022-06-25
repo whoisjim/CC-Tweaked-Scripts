@@ -128,23 +128,23 @@ return {
     end
    end
    self.callbackCount = self.callbackCount + 1
-   for callback in ipairs(self.callbacks) do
+   for i, callback in ipairs(self.callbacks) do
     if self.callbackCount % callback.loop == callback.trigger then
      callback.func(self)
     end
    end
   end -- move loop
  end,
- addCallback = function (self, callbackFunction, loopSize, callIndex)
-  if callIndex == nil then
-   callIndex = 0
+ addCallback = function (self, callbackFunction, loopSize, callTrigger)
+  if callTrigger == nil then
+    callTrigger = 0
   end
   table.insert(
    self.callbacks,
    {
     func = callbackFunction,
     loop = loopSize,
-    index = callIndex,
+    trigger = callTrigger,
    }
   )
  end,
